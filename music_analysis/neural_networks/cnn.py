@@ -9,7 +9,8 @@ import config
 
 def build_model(with_compile = True):
     # Building the CNN
-    regularizer = l2(1e-5)
+    # regularizer = l2(1e-5)
+    regularizer = l2(0)
 
     input_shape = tuple(config.IMG_DIMS)
 
@@ -79,7 +80,7 @@ def build_model(with_compile = True):
 
 
     if with_compile:
-        optimizer = Adam(lr = 0.01)
+        optimizer = Adam(lr = 0.001)
         model.compile(optimizer=optimizer,
                         loss = 'mean_squared_error',
                         metrics = ['mean_absolute_error'])
@@ -96,10 +97,14 @@ if __name__ == '__main__':
 
     for epoch in range(num_epochs):
         batch = loader.next_batch()
+        losses = 0
+        batch_N = 0
         while batch:
+            batch_N += 1
             imgs = batch[0]
-            years = batch[1]
+            years = batch[1] - 2000
 
             loss = model.train_on_batch(imgs, years)
-            print(loss)
+            losses += loss[1]
             batch = loader.next_batch()
+        print(losses / batch_N)
