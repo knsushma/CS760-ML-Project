@@ -1,6 +1,6 @@
 ## CS760-ML-Project
 
-# We want to perform Supervised Multi-Task Learning to evaluate how different learners learn from Audio Data. The multiple tasks for our learners is to learn the following features:
+### We want to perform Supervised Multi-Task Learning to evaluate how different learners learn from Audio Data. The multiple tasks for our learners is to learn the following features:
 
 * Year that a Song was Released on Record
 * Song Performer
