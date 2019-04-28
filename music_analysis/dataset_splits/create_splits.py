@@ -12,9 +12,9 @@ if __name__ == "__main__":
     #first column just has numbers in ascending order... so removing them
     df= df.iloc[:, 1:]
 
-    #filling na values
-    df['Year'] = df['Year'].fillna(2000)
-    df['Top Genre'] = df['Top Genre'].fillna('Experimental')
+    #filling na values for year with mean
+    df['Year'] = df['Year'].fillna(df['Year'].mean())
+
 
     # dropping na values for artist
     df = df.dropna()
