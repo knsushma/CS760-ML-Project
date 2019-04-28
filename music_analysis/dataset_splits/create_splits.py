@@ -1,6 +1,4 @@
-from sklearn import preprocessing
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import StratifiedKFold
 
@@ -23,13 +21,19 @@ if __name__ == "__main__":
     df = df.reset_index(drop=True)
 
 
-    X = df.iloc[:, :-4]
+    #concatenating top_genre, artist as a clever means for stratifying based on 2 columns
+    df['Genre and Artist'] = df['Top Genre'].astype(str) + df['Artist'].astype(str)
 
-    y_genre = df['Top Genre']
+    #stratifying is possible only if there are atleast 2 samples for a given class
+    g = df.groupby('Genre and Artist')
+    df = g.filter(lambda x: len(x) > 1)
+
+    X = df.iloc[:, :-5]
+    y_genre_artist = df['Genre and Artist']
     sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
-    sss.get_n_splits(X, y_genre)
+    sss.get_n_splits(X, y_genre_artist)
 
-    for train_indices, test_indices in sss.split(X, y_genre):
+    for train_indices, test_indices in sss.split(X, y_genre_artist):
         df_train, df_test = df.iloc[train_indices], df.iloc[test_indices]
         df_train = df_train.reset_index(drop=True)
         df_test = df_test.reset_index(drop=True)
@@ -39,12 +43,12 @@ if __name__ == "__main__":
 
     skf = StratifiedKFold(n_splits=5)
 
-    X_train = df_train.iloc[:, :-4]
-    y_genre_train = df_train['Top Genre']
+    X_train = df_train.iloc[:, :-5]
+    y_genre_artist_train = df_train['Genre and Artist']
 
-    skf.get_n_splits(X_train, y_genre_train)
+    skf.get_n_splits(X_train, y_genre_artist_train)
 
-    for i, (train_indices, test_indices) in enumerate(skf.split(X_train, y_genre_train)):
+    for i, (train_indices, test_indices) in enumerate(skf.split(X_train, y_genre_artist_train)):
         df_train_fold, df_test_fold = df_train.iloc[train_indices], df_train.iloc[test_indices]
         df_train_fold = df_train_fold.reset_index(drop=True)
         df_test_fold = df_test_fold.reset_index(drop=True)
