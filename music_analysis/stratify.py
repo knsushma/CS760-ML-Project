@@ -1,6 +1,4 @@
 import pandas as pd
-from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
@@ -11,10 +9,11 @@ from sklearn.preprocessing import StandardScaler
 # Function to perform training with svm LinearSVC.
 def train_using_svm_SVC(X_train, y_train):
     # Creating the classifier object
-    svm_model = svm.SVC(kernel='rbf')
+    svm_model = svm.SVC(kernel='rbf',gamma='auto')
     # Performing training
     svm_model.fit(X_train, y_train)
     return svm_model
+
 
 # Function to perform training with giniIndex.
 def train_using_gini(X_train, y_train):
@@ -25,6 +24,7 @@ def train_using_gini(X_train, y_train):
     # Performing training
     clf_gini.fit(X_train, y_train)
     return clf_gini
+
 
 # Function to perform training with logistic regression.
 def train_using_logistic_regression(X_train, y_train):
@@ -37,9 +37,8 @@ def train_using_logistic_regression(X_train, y_train):
 
 # Function to calculate accuracy
 def cal_accuracy(y_test, y_pred):
-
     print("Accuracy : ",
-          accuracy_score(y_test,y_pred))
+          accuracy_score(y_test, y_pred))
 
 
 # Function to make predictions
@@ -48,41 +47,46 @@ def prediction(X_test, clf_object):
     y_pred = clf_object.predict(X_test)
     return y_pred
 
-X = pd.read_excel('essentia_features_WITH_LABEL.xlsx', sheet_name='Sheet1', usecols='B:PV', userows='2:7219')
-X = X.dropna()
-y = X.iloc[:,-1]
-X = X.iloc[:,:-1]
-scaler = StandardScaler()
-scaler.fit(X)
-X = scaler.transform(X)
-le = preprocessing.LabelEncoder()
-le.fit(y)
-y = le.transform(y)
+
+def standardize(X_train, X_test):
+    # Standardize train and test data
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+    return X_train, X_test
 
 
-sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
-sss.get_n_splits(X, y)
+def label_encoding(y_train, y_test):
+    le = preprocessing.LabelEncoder()
+    le.fit(y_train)
+    y_train = le.transform(y_train)
+    y_test = le.transform(y_test)
+    return y_train, y_test
 
-for train_index, test_index in sss.split(X, y):
-    # print("TRAIN:", train_index, "TEST:", test_index)
-    X_train_init, X_test_final = X[train_index], X[test_index]
-    y_train_init, y_test_final = y[train_index], y[test_index]
 
-skf = StratifiedKFold(n_splits=5)
-skf.get_n_splits(X_train_init, y_train_init)
-for train_index, test_index in skf.split(X_train_init, y_train_init):
+for i in range(1, 6):
+    # Train data
+    X_train = pd.read_csv('dataset_splits/essentia_trainfold_' + str(i) + '.csv')
+    y_train = X_train.iloc[:, -2]
+    X_train = X_train.iloc[:, 1:-6]
+    # Test data
+    X_test = pd.read_csv('dataset_splits/essentia_testfold_' + str(i) + '.csv')
+    y_test = X_test.iloc[:, -2]
+    X_test = X_test.iloc[:, 1:-6]
 
-    print("TRAIN:", train_index, "TEST:", test_index)
-    X_train, X_test = X_train_init[train_index], X_train_init[test_index]
-    y_train, y_test = y_train_init[train_index], y_train_init[test_index]
+    # Standardize train and test data
+    X_train, X_test = standardize(X_train, X_test)
 
-    #Model training
+    # Label Encoding labels
+    y_train, y_test = label_encoding(y_train, y_test)
 
+    # Model training
     svm_model = train_using_svm_SVC(X_train, y_train)
     clf_gini = train_using_gini(X_train, y_train)
     lr_model = train_using_logistic_regression(X_train, y_train)
 
-    #Verify with test set
+    # Verify with test set
 
     print("Results Using SVM:")
     # Prediction Using SVM
@@ -99,7 +103,37 @@ for train_index, test_index in skf.split(X_train_init, y_train_init):
     y_pred_gini = prediction(X_test, clf_gini)
     cal_accuracy(y_test, y_pred_gini)
 
+    print("********************************")
 
+# Final test data
 
+X_train = pd.read_csv('dataset_splits/essentia_train.csv')
+y_train = X_train.iloc[:, -2]
+X_train = X_train.iloc[:, 1:-6]
 
-    
+X_test = pd.read_csv('dataset_splits/essentia_test.csv')
+y_test = X_test.iloc[:, -2]
+X_test = X_test.iloc[:, 1:-6]
+
+# Standardize train and test data
+X_train, X_test = standardize(X_train, X_test)
+
+# Label Encoding labels
+y_train, y_test = label_encoding(y_train, y_test)
+
+# Verify with test set
+
+print("Final Results Using SVM:")
+# Prediction Using SVM
+y_pred_svm = prediction(X_test, svm_model)
+cal_accuracy(y_test, y_pred_svm)
+
+print("Final Results Using Logistic:")
+# Prediction Using SVM
+y_pred_lr = prediction(X_test, lr_model)
+cal_accuracy(y_test, y_pred_lr)
+
+print("Final Results Using GINI:")
+# Prediction using gini
+y_pred_gini = prediction(X_test, clf_gini)
+cal_accuracy(y_test, y_pred_gini)
