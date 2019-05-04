@@ -18,7 +18,6 @@ if __name__ == "__main__":
     df = df.reset_index(drop=True)
 
     # Stratification
-    # TODO: Stratify based on sections of year
 
     ####### WORKSPACE ########
 

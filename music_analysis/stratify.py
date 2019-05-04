@@ -238,8 +238,6 @@ if __name__ == "__main__":
 
     # B. Classification
 
-    # TODO: Check if label encoding is required here
-
     # Model training for year classification
     svm_model_year = train_using_svm_SVC(X_train, y_train_year_classification_label)
     lr_model_year = train_using_logistic_regression(X_train, y_train_year_classification_label)
