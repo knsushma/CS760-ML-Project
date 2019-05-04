@@ -216,8 +216,15 @@ if __name__ == "__main__":
     # A. Regression
 
     # Standardize year values
-    y_train_year = preprocessing.scale(y_train_year)
-    y_test_year = preprocessing.scale(y_test_year)
+
+    # y_train_year = preprocessing.scale(y_train_year)
+    # y_test_year = preprocessing.scale(y_test_year)
+
+    # scaler = preprocessing.StandardScaler()
+    # y_train_year = scaler.fit_transform(y_train_year.values.reshape(-1, 1))
+    # y_test_year = scaler.fit_transform(y_test_year.values.reshape(-1, 1))
+
+    y_train_year, y_test_year = standardize(y_train_year.values.reshape(-1, 1), y_test_year.values.reshape(-1, 1))
 
     # Model training for year regression
     linear_regression_model_year = train_using_linear_regression(X_train, y_train_year)
