@@ -1,11 +1,14 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
 from sklearn import svm
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+
 
 # Function to perform training with svm LinearSVC.
 def train_using_svm_SVC(X_train, y_train):
@@ -26,6 +29,7 @@ def train_using_gini(X_train, y_train):
     clf_gini.fit(X_train, y_train)
     return clf_gini
 
+
 # Function to perform training with randomForest.
 def train_using_rf(X_train, y_train):
     # Creating the classifier object
@@ -33,7 +37,6 @@ def train_using_rf(X_train, y_train):
     # Performing training
     rf_model.fit(X_train, y_train)
     return rf_model
-
 
 
 # Function to perform training with logistic regression.
@@ -45,10 +48,27 @@ def train_using_logistic_regression(X_train, y_train):
     return lr_model
 
 
-# Function to calculate accuracy
-def cal_accuracy(y_test, y_pred):
+# Function to perform training with linear regression.
+def train_using_linear_regression(X_train, y_train):
+    # Creating the Linear Regression object
+    linear_regression_model = LinearRegression()
+    # Performing training
+    linear_regression_model.fit(X_train, y_train)
+    return linear_regression_model
+
+
+# Function to calculate classification accuracy
+def cal_classification_accuracy(y_test, y_pred):
     print("Accuracy : ",
           accuracy_score(y_test, y_pred))
+
+
+# Function to calculate regression accuracy
+def cal_regression_accuracy(y_test, y_pred):
+    print("Accuracy using MSE: ",
+          mean_squared_error(y_test, y_pred))
+    print("Accuracy using R2 score: ",
+          r2_score(y_test, y_pred))
 
 
 # Function to make predictions
@@ -74,78 +94,97 @@ def label_encoding(y_train, y_test):
     y_test = le.transform(y_test)
     return y_train, y_test
 
+
 def print_res_classification(X_test,svm_model,lr_model,rf_model,y_test):
 
     print("Results Using SVM:")
     # Prediction Using SVM
     y_pred_svm = prediction(X_test, svm_model)
-    cal_accuracy(y_test, y_pred_svm)
+    cal_classification_accuracy(y_test, y_pred_svm)
 
     print("Results Using Logistic:")
     # Prediction Using SVM
     y_pred_lr = prediction(X_test, lr_model)
-    cal_accuracy(y_test, y_pred_lr)
+    cal_classification_accuracy(y_test, y_pred_lr)
 
     print("Results Using Random Forest:")
     # Prediction using gini
     y_pred_gini = prediction(X_test, rf_model)
-    cal_accuracy(y_test, y_pred_gini)
+    cal_classification_accuracy(y_test, y_pred_gini)
 
     print("********************************")
 
+
+def print_res_regression(X_test, linear_regression_model, y_test):
+    print("Results Using Linear Regression:")
+    # Prediction Using Linear Regression
+    y_pred_linear_regression = prediction(X_test, linear_regression_model)
+    # print("PREDICTED VALUES: \n")
+    # print(y_pred_linear_regression)
+    cal_regression_accuracy(y_test, y_pred_linear_regression)
+
+    print("********************************")
+
+
 if __name__ == "__main__":
-    #5 fold cross validation
-    no_folds = 5
 
-    for i in range(1, no_folds):
-        # Train data for genre
-        X_train = pd.read_csv('dataset_splits/essentia_trainfold_' + str(i) + '.csv')
-        y_train_genre = X_train.iloc[:, -2]
-        y_train_artist = X_train.iloc[:, -4]
-        y_train_year = X_train.iloc[:, -3]
-        y_train_year = y_train_year.round(0).astype(int)
-        X_train = X_train.iloc[:, 1:-6]
-        # Test data for genre
-        X_test = pd.read_csv('dataset_splits/essentia_testfold_' + str(i) + '.csv')
-        y_test_genre = X_test.iloc[:, -2]
-        y_test_artist = X_test.iloc[:, -4]
-        X_test = X_test.iloc[:, 1:-6]
+    # Cross-validation TODO: Check if required. Modify accordingly.
+    # 5 fold cross validation
+    # no_folds = 5
 
-        # Standardize train and test data
-        X_train, X_test = standardize(X_train, X_test)
-
-        # Label Encoding labels genre
-        y_train_genre, y_test_genre = label_encoding(y_train_genre, y_test_genre)
-
-        # Model training for genre prediction
-        svm_model_genre = train_using_svm_SVC(X_train, y_train_genre)
-        lr_model_genre = train_using_logistic_regression(X_train, y_train_genre)
-        rf_model_genre = train_using_rf(X_train, y_train_genre)
-
-        # Print test results for genre
-        print("GENRE:")
-        print_res_classification(X_test,svm_model_genre,lr_model_genre,rf_model_genre,y_test_genre)
-
-        # Label Encoding labels artist
-        y_train_artist, y_test_artist = label_encoding(y_train_artist, y_test_artist)
-
-        print("ARTIST:")
-        # Model training for artist prediction
-        svm_model_artist = train_using_svm_SVC(X_train, y_train_artist)
-        lr_model_artist = train_using_logistic_regression(X_train, y_train_artist)
-        rf_model_artist = train_using_rf(X_train, y_train_artist)
-        # Print test results for artist
-        print_res_classification(X_test,svm_model_artist,lr_model_artist,rf_model_artist,y_test_artist)
+    # for i in range(1, no_folds):
+    #     # Train data for genre
+    #     X_train = pd.read_csv('dataset_splits/essentia_trainfold_' + str(i) + '.csv')
+    #     y_train_genre = X_train.iloc[:, -2]
+    #     y_train_artist = X_train.iloc[:, -4]
+    #     y_train_year = X_train.iloc[:, -3]
+    #     y_train_year = y_train_year.round(0).astype(int)
+    #     X_train = X_train.iloc[:, 1:-6]
+    #     # Test data for genre
+    #     X_test = pd.read_csv('dataset_splits/essentia_testfold_' + str(i) + '.csv')
+    #     y_test_genre = X_test.iloc[:, -2]
+    #     y_test_artist = X_test.iloc[:, -4]
+    #     X_test = X_test.iloc[:, 1:-6]
+    #
+    #     # Standardize train and test data
+    #     X_train, X_test = standardize(X_train, X_test)
+    #
+    #     # Label Encoding labels genre
+    #     y_train_genre, y_test_genre = label_encoding(y_train_genre, y_test_genre)
+    #
+    #     # Model training for genre prediction
+    #     svm_model_genre = train_using_svm_SVC(X_train, y_train_genre)
+    #     lr_model_genre = train_using_logistic_regression(X_train, y_train_genre)
+    #     rf_model_genre = train_using_rf(X_train, y_train_genre)
+    #
+    #     # Print test results for genre
+    #     print("GENRE:")
+    #     print_res_classification(X_test,svm_model_genre,lr_model_genre,rf_model_genre,y_test_genre)
+    #
+    #     # Label Encoding labels artist
+    #     y_train_artist, y_test_artist = label_encoding(y_train_artist, y_test_artist)
+    #
+    #     print("ARTIST:")
+    #     # Model training for artist prediction
+    #     svm_model_artist = train_using_svm_SVC(X_train, y_train_artist)
+    #     lr_model_artist = train_using_logistic_regression(X_train, y_train_artist)
+    #     rf_model_artist = train_using_rf(X_train, y_train_artist)
+    #     # Print test results for artist
+    #     print_res_classification(X_test,svm_model_artist,lr_model_artist,rf_model_artist,y_test_artist)
 
     # Final test results
 
-    X_train = pd.read_csv('dataset_splits/essentia_train.csv')
+    # X_train = pd.read_csv('dataset_splits/essentia_train.csv')
+    X_train = pd.read_csv('dataset_splits/year_essentia_train.csv')
     y_train_genre = X_train.iloc[:, -2]
+    y_train_year = X_train.iloc[:, -3]
     y_train_artist = X_train.iloc[:, -4]
     X_train = X_train.iloc[:, 1:-6]
 
-    X_test = pd.read_csv('dataset_splits/essentia_test.csv')
+    # X_test = pd.read_csv('dataset_splits/essentia_test.csv')
+    X_test = pd.read_csv('dataset_splits/year_essentia_test.csv')
     y_test_genre = X_test.iloc[:, -2]
+    y_test_year = X_test.iloc[:, -3]
     y_test_artist = X_test.iloc[:, -4]
     X_test = X_test.iloc[:, 1:-6]
 
@@ -155,6 +194,11 @@ if __name__ == "__main__":
     # Label Encoding labels
     y_train_genre, y_test_genre = label_encoding(y_train_genre, y_test_genre)
 
+    # Model training for genre prediction
+    svm_model_genre = train_using_svm_SVC(X_train, y_train_genre)
+    lr_model_genre = train_using_logistic_regression(X_train, y_train_genre)
+    rf_model_genre = train_using_rf(X_train, y_train_genre)
+
     # Print test results for genre
     print("GENRE:")
     print_res_classification(X_test, svm_model_genre,lr_model_genre, rf_model_genre, y_test_genre)
@@ -162,6 +206,18 @@ if __name__ == "__main__":
     # Label Encoding labels artist
     y_train_artist, y_test_artist = label_encoding(y_train_artist, y_test_artist)
 
+    # Model training for artist prediction
+    svm_model_artist = train_using_svm_SVC(X_train, y_train_artist)
+    lr_model_artist = train_using_logistic_regression(X_train, y_train_artist)
+    rf_model_artist = train_using_rf(X_train, y_train_artist)
+
     # Print test results for artist
     print("ARTIST:")
     print_res_classification(X_test, svm_model_artist,lr_model_artist,rf_model_artist, y_test_artist)
+
+    # Model training for year prediction
+    linear_regression_model_year = train_using_linear_regression(X_train, y_train_year)
+
+    # Print test results for Year
+    print("UNSTRATIFIED YEAR: ")
+    print_res_regression(X_test, linear_regression_model_year, y_test_year)
