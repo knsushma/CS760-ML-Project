@@ -83,7 +83,7 @@ for k,v in track_map.items():
 
 result = {}
 for i in track_ids:
-    result[i] = track_genre[i]
+    result[i] = track_genre_map[i]
 
 file_writer = "./essentia_features_genre.csv"
 with open(file_writer, 'w') as csv_file:
