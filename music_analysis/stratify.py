@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -65,15 +65,13 @@ def cal_classification_accuracy(y_test, y_pred):
 
 # Function to calculate regression accuracy
 def cal_regression_accuracy(y_test, y_pred):
-    print("Accuracy using MSE: ",
-          mean_squared_error(y_test, y_pred))
-    print("Accuracy using R2 score: ",
-          r2_score(y_test, y_pred))
+    print("Mean Absolute Error: ",
+          mean_absolute_error(y_test, y_pred))
 
 
 # Function to make predictions
 def prediction(X_test, clf_object):
-    # Predicton
+    # Prediction
     y_pred = clf_object.predict(X_test)
     return y_pred
 
@@ -100,8 +98,6 @@ def print_res_classification(X_test,svm_model,lr_model,rf_model,y_test):
     print("Results Using SVM:")
     # Prediction Using SVM
     y_pred_svm = prediction(X_test, svm_model)
-    # print("PREDICTED VALUES SVM: \n")
-    # print(y_pred_svm)
     cal_classification_accuracy(y_test, y_pred_svm)
 
     print("Results Using Logistic:")
@@ -121,8 +117,6 @@ def print_res_regression(X_test, linear_regression_model, y_test):
     print("Results Using Linear Regression:")
     # Prediction Using Linear Regression
     y_pred_linear_regression = prediction(X_test, linear_regression_model)
-    # print("PREDICTED VALUES Linear Regression: \n")
-    # print(y_pred_linear_regression)
     cal_regression_accuracy(y_test, y_pred_linear_regression)
 
     print("********************************")
@@ -180,11 +174,13 @@ if __name__ == "__main__":
 
     X_train = pd.read_csv('dataset_splits/essentia_train.csv')
     y_train_genre = X_train.iloc[:, -2]
+    y_train_year = X_train.iloc[:, -3]
     y_train_artist = X_train.iloc[:, -4]
     X_train = X_train.iloc[:, 1:-6]
 
     X_test = pd.read_csv('dataset_splits/essentia_test.csv')
     y_test_genre = X_test.iloc[:, -2]
+    y_test_year = X_test.iloc[:, -3]
     y_test_artist = X_test.iloc[:, -4]
     X_test = X_test.iloc[:, 1:-6]
 
@@ -217,20 +213,11 @@ if __name__ == "__main__":
 
     # YEAR
 
-    X_train = pd.read_csv('dataset_splits/year_essentia_train.csv')
-    y_train_year = X_train.iloc[:, -3]
-    y_train_year_classification_label = X_train.iloc[:, -1]
-    X_train = X_train.iloc[:, 1:-6]
-
-    X_test = pd.read_csv('dataset_splits/year_essentia_test.csv')
-    y_test_year = X_test.iloc[:, -3]
-    y_test_year_classification_label = X_test.iloc[:, -1]
-    X_test = X_test.iloc[:, 1:-6]
-
-    # Standardize train and test data
-    X_train, X_test = standardize(X_train, X_test)
-
     # A. Regression
+
+    # Standardize year values
+    y_train_year = preprocessing.scale(y_train_year)
+    y_test_year = preprocessing.scale(y_test_year)
 
     # Model training for year regression
     linear_regression_model_year = train_using_linear_regression(X_train, y_train_year)
@@ -239,6 +226,18 @@ if __name__ == "__main__":
     print_res_regression(X_test, linear_regression_model_year, y_test_year)
 
     # B. Classification
+
+    # Changing to the dataset with no missing values for year
+    X_train = pd.read_csv('dataset_splits/year_essentia_train.csv')
+    y_train_year_classification_label = X_train.iloc[:, -1]
+    X_train = X_train.iloc[:, 1:-6]
+
+    X_test = pd.read_csv('dataset_splits/year_essentia_test.csv')
+    y_test_year_classification_label = X_test.iloc[:, -1]
+    X_test = X_test.iloc[:, 1:-6]
+
+    # Standardize train and test data
+    X_train, X_test = standardize(X_train, X_test)
 
     # Model training for year classification
     svm_model_year = train_using_svm_SVC(X_train, y_train_year_classification_label)
