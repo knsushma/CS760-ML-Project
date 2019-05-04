@@ -100,6 +100,8 @@ def print_res_classification(X_test,svm_model,lr_model,rf_model,y_test):
     print("Results Using SVM:")
     # Prediction Using SVM
     y_pred_svm = prediction(X_test, svm_model)
+    # print("PREDICTED VALUES SVM: \n")
+    # print(y_pred_svm)
     cal_classification_accuracy(y_test, y_pred_svm)
 
     print("Results Using Logistic:")
@@ -119,7 +121,7 @@ def print_res_regression(X_test, linear_regression_model, y_test):
     print("Results Using Linear Regression:")
     # Prediction Using Linear Regression
     y_pred_linear_regression = prediction(X_test, linear_regression_model)
-    # print("PREDICTED VALUES: \n")
+    # print("PREDICTED VALUES Linear Regression: \n")
     # print(y_pred_linear_regression)
     cal_regression_accuracy(y_test, y_pred_linear_regression)
 

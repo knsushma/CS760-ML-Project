@@ -19,15 +19,21 @@ if __name__ == "__main__":
 
     # Stratification
 
-    ####### WORKSPACE ########
-
-    # TRYING OUT BINARY CLASSIFICATION FIRST TODO: multiple bin divisions
-
-    # df['color'] = np.where(df['Set'] == 'Z', 'green', 'red')
+    # TRYING OUT BINARY CLASSIFICATION FIRST
     # Below 2011 : 0, Equal or Above 2011: 1
-    df['Year classification label'] = np.where(df['Year'] >= 2011, 1, 0)
+    # df['Year classification label'] = np.where(df['Year'] >= 2011, 1, 0)
 
-    ##########################
+    # Multiple bins : 5 bins
+
+    conditions = [
+        (df['Year'] <= 2009),
+        (df['Year'] > 2009) & (df['Year'] <= 2011),
+        (df['Year'] > 2011) & (df['Year'] <= 2012),
+        (df['Year'] > 2012) & (df['Year'] <= 2013),
+        (df['Year'] > 2013)]
+
+    choices = ['0', '1', '2', '3', '4']
+    df['Year classification label'] = np.select(conditions, choices)
 
     # Stratifying is possible only if there are at least 2 samples for a given class
     g = df.groupby('Year classification label')
