@@ -217,10 +217,12 @@ if __name__ == "__main__":
 
     X_train = pd.read_csv('dataset_splits/year_essentia_train.csv')
     y_train_year = X_train.iloc[:, -3]
+    y_train_year_classification_label = X_train.iloc[:, -1]
     X_train = X_train.iloc[:, 1:-6]
 
     X_test = pd.read_csv('dataset_splits/year_essentia_test.csv')
     y_test_year = X_test.iloc[:, -3]
+    y_test_year_classification_label = X_test.iloc[:, -1]
     X_test = X_test.iloc[:, 1:-6]
 
     # Standardize train and test data
@@ -228,11 +230,22 @@ if __name__ == "__main__":
 
     # A. Regression
 
-    # Model training for year prediction
+    # Model training for year regression
     linear_regression_model_year = train_using_linear_regression(X_train, y_train_year)
-    # Print test results for Year
-    print("UNSTRATIFIED YEAR: ")
+    # Print test results for Year regression
+    print("UNSTRATIFIED YEAR (REGRESSION) : ")
     print_res_regression(X_test, linear_regression_model_year, y_test_year)
 
     # B. Classification
 
+    # TODO: Check if label encoding is required here
+
+    # Model training for year classification
+    svm_model_year = train_using_svm_SVC(X_train, y_train_year_classification_label)
+    lr_model_year = train_using_logistic_regression(X_train, y_train_year_classification_label)
+    rf_model_year = train_using_rf(X_train, y_train_year_classification_label)
+
+    # Print test results for year classification
+    print("STRATIFIED YEAR (CLASSIFICATION):")
+    print_res_classification(X_test, svm_model_year,
+                             lr_model_year, rf_model_year, y_test_year_classification_label)
