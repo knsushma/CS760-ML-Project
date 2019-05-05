@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.metrics import mean_absolute_error
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn import svm
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
@@ -55,6 +55,24 @@ def train_using_linear_regression(X_train, y_train):
     # Performing training
     linear_regression_model.fit(X_train, y_train)
     return linear_regression_model
+
+
+# Function to perform training with ridge regression.
+def train_using_ridge_regression(X_train, y_train):
+    # Creating the Ridge Regression object
+    linear_ridge_model_year = Ridge()
+    # Performing training
+    linear_ridge_model_year.fit(X_train, y_train)
+    return linear_ridge_model_year
+
+
+# Function to perform training with lasso regression.
+def train_using_lasso_regression(X_train, y_train):
+    # Creating the Lasso Regression object
+    lasso_regression_model = Lasso()
+    # Performing training
+    lasso_regression_model.fit(X_train, y_train)
+    return lasso_regression_model
 
 
 # Function to calculate classification accuracy
@@ -116,14 +134,23 @@ def print_res_classification(X_test,svm_model,lr_model,rf_model,y_test):
     return svm_accuracy_score, lr_accuracy_score, rf_accuracy_score
 
 
-def print_res_regression(X_test, linear_regression_model, y_test):
+def print_res_regression(X_test, linear_regression_model,
+                         ridge_regression_model, lasso_regression_model, y_test):
+    # Prediction
     print("Results Using Linear Regression:")
-    # Prediction Using Linear Regression
     y_pred_linear_regression = prediction(X_test, linear_regression_model)
-    lr_accuracy_score = cal_regression_accuracy(y_test, y_pred_linear_regression)
+    linear_regression_accuracy_score = cal_regression_accuracy(y_test, y_pred_linear_regression)
+
+    print("Results Using Ridge Regression:")
+    y_pred_ridge_regression = prediction(X_test, ridge_regression_model)
+    ridge_regression_accuracy_score = cal_regression_accuracy(y_test, y_pred_ridge_regression)
+
+    print("Results Using Lasso Regression:")
+    y_pred_lasso_regression = prediction(X_test, lasso_regression_model)
+    lasso_regression_accuracy_score = cal_regression_accuracy(y_test, y_pred_lasso_regression)
 
     print("********************************")
-    return lr_accuracy_score
+    return linear_regression_accuracy_score, ridge_regression_accuracy_score, lasso_regression_accuracy_score
 
 def train_for_genre(X_train, X_test, y_train_genre, y_test_genre):
     # Standardize train and test data
@@ -154,6 +181,7 @@ def train_for_artist(X_train, X_test, y_train_artist, y_test_artist):
     print("ARTIST:")
     return print_res_classification(X_test, svm_model_artist, lr_model_artist, rf_model_artist, y_test_artist)
 
+
 def train_for_year(X_train, X_test, y_train_year, y_test_year):
     # standarddize labels for year
     y_train_year, y_test_year = standardize(y_train_year.values.reshape(-1, 1), y_test_year.values.reshape(-1, 1))
@@ -163,6 +191,7 @@ def train_for_year(X_train, X_test, y_train_year, y_test_year):
     # Print test results for Year regression
     print("UNSTRATIFIED YEAR (REGRESSION) : ")
     return print_res_regression(X_test, linear_regression_model_year, y_test_year)
+
 
 def get_train_dataset(file_name):
     X_train = pd.read_csv(file_name)
@@ -233,9 +262,12 @@ if __name__ == "__main__":
 
     # Model training for year regression
     linear_regression_model_year = train_using_linear_regression(X_train, y_train_year)
+    linear_ridge_model_year = train_using_ridge_regression(X_train, y_train_year)
+    linear_lasso_model_year = train_using_lasso_regression(X_train, y_train_year)
     # Print test results for Year regression
     print("UNSTRATIFIED YEAR (REGRESSION) : ")
-    print_res_regression(X_test, linear_regression_model_year, y_test_year)
+    print_res_regression(X_test, linear_regression_model_year,
+                         linear_ridge_model_year, linear_lasso_model_year, y_test_year)
 
     # B. Classification
     # Changing to the dataset with no missing values for year
@@ -260,9 +292,7 @@ if __name__ == "__main__":
     print_res_classification(X_test, svm_model_year,
                              lr_model_year, rf_model_year, y_test_year_classification_label)
 
-
-
-    # #Cross-validation: 5 fold cross validation
+    # # CROSS-VALIDATION: 5 fold cross validation
     # no_folds = 5
     #
     # genre_svm_accuracy_score = 0.0
@@ -304,6 +334,8 @@ if __name__ == "__main__":
     # artist_lr_accuracy_score /= no_folds
     # artist_rf_accuracy_score /= no_folds
     # year_lr_accuracy_score /= no_folds
-    # print("Genre Accuracy: SVM = {0} | LR = {1} | RF = {2}".format(genre_svm_accuracy_score, genre_lr_accuracy_score, genre_rf_accuracy_score))
-    # print("Artist Accuracy: SVM = {0} | LR = {1} | RF = {2}".format(artist_svm_accuracy_score, artist_lr_accuracy_score, artist_rf_accuracy_score))
+    # print("Genre Accuracy: SVM = {0} | LR = {1} | RF =
+    # {2}".format(genre_svm_accuracy_score, genre_lr_accuracy_score, genre_rf_accuracy_score))
+    # print("Artist Accuracy: SVM = {0} | LR = {1} | RF =
+    # {2}".format(artist_svm_accuracy_score, artist_lr_accuracy_score, artist_rf_accuracy_score))
     # print("Genre Accuracy: LR = {0}".format(year_lr_accuracy_score))
