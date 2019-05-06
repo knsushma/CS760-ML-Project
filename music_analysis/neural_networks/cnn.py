@@ -148,6 +148,15 @@ if __name__ == '__main__':
     loader_validation = Loader(validation_folds, loader_batch_size)
     model = build_model(learning_rate)
 
+    # Verbose Out
+    keras.utils.plot_model(model, to_file = model_type + '.png')
+    with open(model_type + '.txt', 'w+') as f:
+        def print_s(s): print(s, file = f)
+        model.summary(print_fn = print_s)
+
+    if num_epochs == 0:
+        exit()
+
     for epoch in range(num_epochs):
         batch = loader_train.next_batch()
 
