@@ -28,7 +28,7 @@ def track_id_to_filepath(track_id):
     subdir = os.path.join(config.MEL_SPEC_DIR, track_id_str[0:3])
     filepath = os.path.join(subdir, track_id_str + '.png')
     if not os.path.exists(filepath):
-        print('File: ', filepath, ' does not exist. :(')
+        # print('File: ', filepath, ' does not exist. :(')
         return None
     return filepath
 

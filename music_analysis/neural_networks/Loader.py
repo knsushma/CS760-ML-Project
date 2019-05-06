@@ -30,7 +30,7 @@ class Loader:
 
             return None
 
-        batch = self._labels.loc[self._curr_idx:self._curr_idx+self._batch_size, :]
+        batch = self._labels.loc[self._curr_idx:self._curr_idx+self._batch_size-1, :]
         encoded_batch = self._encode_batch(batch)
 
         self._curr_idx += self._batch_size
@@ -45,18 +45,24 @@ class Loader:
         # TODO: Implement encoding on artists, genres
         images = np.zeros([batch_size] + config.IMG_DIMS)
         years = np.zeros([batch_size] + [1])
+        genres = np.zeros([batch_size] + [8])
+        artists = np.zeros([batch_size] + [config.NUM_ARTISTS])
 
         for j, i in enumerate(range(self._curr_idx, self._curr_idx + batch_size)):
             images[j,:,:,:] = img_load.load_and_encode_img(batch.loc[i, 'track_id'])
             years[j,0] = batch.loc[i, 'Year']
-            if np.isnan(years[j,0]):
-                years[j,0] = 2000
+            years[j,0] = (years[j,0] - config.MIN_YEAR) / (config.MAX_YEAR - config.MIN_YEAR)
+            # if np.isnan(years[j,0]):
+            #     years[j,0] = 2000
+            genres[j, config.GENRES.index(batch.loc[i, 'Top Genre'])] = 1
+            artists[j, config.ARTISTS.index(batch.loc[i, 'Artist'])] = 1
 
-        return images, years
+        return images, years, genres, artists
 
 if __name__ == '__main__':
-    test_loader = Loader([config.LABELS_ONLY], 8, stochastic=False)
+    test_loader = Loader([config.TRAIN_FOLDS_LABELS[0]], 8, stochastic=False)
 
     batch = test_loader.next_batch()
     while batch:
         batch = test_loader.next_batch()
+        print(batch[3])
